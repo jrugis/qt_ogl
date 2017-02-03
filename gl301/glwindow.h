@@ -6,7 +6,6 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
-#include <QMatrix4x4>
 
 #include "transform3d.h"
 

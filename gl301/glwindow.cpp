@@ -81,7 +81,7 @@ void GLWindow::initializeGL()
   m_shader->link();
   m_shader->bind();
 
-  // Cache Uniform Locations
+  // cache uniform locations
   u_modelToWorld = m_shader->uniformLocation("modelToWorld");
   u_worldToView = m_shader->uniformLocation("worldToView");
 
@@ -108,7 +108,7 @@ void GLWindow::initializeGL()
 void GLWindow::resizeGL(int width, int height)
 {
     m_projection.setToIdentity();
-    m_projection.perspective(45.0f, width / float(height), 0.0f, 1000.0f);
+    m_projection.perspective(30.0f, width / float(height), 0.0f, 100.0f);
 }
 
 void GLWindow::paintGL()
@@ -118,8 +118,8 @@ void GLWindow::paintGL()
   // render using shaders
   m_shader->bind();
   m_shader->setUniformValue(u_worldToView, m_projection);
-  m_vao.bind();
   m_shader->setUniformValue(u_modelToWorld, m_transform.toMatrix());
+  m_vao.bind();
   glDrawArrays(GL_TRIANGLES, 0, sizeof(sg_verts) / sizeof(sg_verts[0]));
   m_vao.release();
   m_shader->release();

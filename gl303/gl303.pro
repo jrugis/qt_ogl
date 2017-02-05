@@ -17,6 +17,10 @@ HEADERS += \
     scene.h \
     object.h
 
+win32 {
+    LIBS += opengl32.lib
+}
+
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all APIs deprecated before Qt 6.0.0
 

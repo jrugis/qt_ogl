@@ -10,4 +10,5 @@ void main()
 {
   gl_Position = worldToView * modelToWorld * vec4(position, 1.0);
   vColor = vec4(color, 1.0f);
+  //vColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }

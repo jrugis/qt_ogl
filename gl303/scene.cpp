@@ -46,6 +46,8 @@ static const Vertex sg_verts[] = {
 #undef VERTEX_FTL
 #undef VERTEX_FTR
 
+#define ROTSP 20.0f // animation rotation speed (milli-seconds per degree)
+
 Scene::Scene()
 {
   m_object01 = new Object(this);
@@ -102,7 +104,7 @@ void Scene::resize(int width, int height)
   m_projection.perspective(30.0f, width / float(height), 0.0f, 100.0f);
 }
 
-void Scene::paint()
+void Scene::draw()
 {
   glClear(GL_COLOR_BUFFER_BIT);
 
@@ -116,7 +118,7 @@ void Scene::paint()
   m_shader->release();
 }
 
-void Scene::update() // locked to vsync
+void Scene::animation_tick(int elapsed_time)
 {
-  m_transform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
+  m_transform.rotate(elapsed_time / ROTSP, QVector3D(0.4f, 0.3f, 0.3f));
 }

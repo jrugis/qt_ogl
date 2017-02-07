@@ -9,13 +9,15 @@ SOURCES += main.cpp \
     glwindow.cpp \
     transform3d.cpp \
     scene.cpp \
-    object.cpp
+    object.cpp \
+    stopwatch.cpp
 HEADERS += \
     glwindow.h \
     vertex.h \
     transform3d.h \
     scene.h \
-    object.h
+    object.h \
+    stopwatch.h
 
 win32 {
     LIBS += opengl32.lib

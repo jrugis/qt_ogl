@@ -5,8 +5,8 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 
-#include "transform3d.h"
 #include "object.h"
+#include "transform3d.h"
 
 class QOpenGLShaderProgram;
 
@@ -17,8 +17,8 @@ public:
   ~Scene();
   void initialize();
   void resize(int width, int height);
-  void paint();
-  void update();
+  void draw();
+  void animation_tick(int elapsed_time);
 
 private:
   Object *m_object01;

@@ -3,6 +3,8 @@
 
 #include <QOpenGLWindow>
 #include <QOpenGLFunctions>
+#include <QTimer>
+#include <QTime>
 
 #include "scene.h"
 
@@ -22,9 +24,13 @@ protected:
   void paintGL();
 
 protected slots:
-  void update();
+  void animation_tick();
+signals:
+  void timeout();
 
 private:
+  QTimer *animation_timer;
+  QTime m_elapsed_time;
   Scene *m_scene01;
 };
 

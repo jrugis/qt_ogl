@@ -1,20 +1,16 @@
-#include "vertex.h"
-#include "scene.h"
+#include "box.h"
 
-#define ROTSP 50.0f // animation rotation speed (milli-seconds per degree)
-
+//****************************************************************************************
 // front verticies
 #define VERTEX_FTR Vertex( QVector3D( 0.5f,  0.5f,  0.5f), QVector3D( 1.0f, 0.0f, 0.0f ) )
 #define VERTEX_FTL Vertex( QVector3D(-0.5f,  0.5f,  0.5f), QVector3D( 0.0f, 1.0f, 0.0f ) )
 #define VERTEX_FBL Vertex( QVector3D(-0.5f, -0.5f,  0.5f), QVector3D( 0.0f, 0.0f, 1.0f ) )
 #define VERTEX_FBR Vertex( QVector3D( 0.5f, -0.5f,  0.5f), QVector3D( 0.0f, 0.0f, 0.0f ) )
-
 // back verticies
 #define VERTEX_BTR Vertex( QVector3D( 0.5f,  0.5f, -0.5f), QVector3D( 1.0f, 1.0f, 0.0f ) )
 #define VERTEX_BTL Vertex( QVector3D(-0.5f,  0.5f, -0.5f), QVector3D( 0.0f, 1.0f, 1.0f ) )
 #define VERTEX_BBL Vertex( QVector3D(-0.5f, -0.5f, -0.5f), QVector3D( 1.0f, 0.0f, 1.0f ) )
 #define VERTEX_BBR Vertex( QVector3D( 0.5f, -0.5f, -0.5f), QVector3D( 1.0f, 1.0f, 1.0f ) )
-
 // colored cube
 static const Vertex sg_verts[] = {
   // face 1 (front)
@@ -36,88 +32,44 @@ static const Vertex sg_verts[] = {
     VERTEX_FTR, VERTEX_FBR, VERTEX_BBR,
     VERTEX_BBR, VERTEX_BTR, VERTEX_FTR
 };
-
 #undef VERTEX_BBR
 #undef VERTEX_BBL
 #undef VERTEX_BTL
 #undef VERTEX_BTR
-
 #undef VERTEX_FBR
 #undef VERTEX_FBL
 #undef VERTEX_FTL
 #undef VERTEX_FTR
+//****************************************************************************************
 
-CScene::CScene()
+CBox::CBox(QOpenGLShaderProgram *shader)
 {
-  m_transform.translate(0.0f, 0.0f, -5.0f);
-}
+  m_shader = shader;
 
-CScene::~CScene()
-{
-  m_shader->release();
-  m_vao.destroy();
-  m_buffer.destroy();
-  delete m_shader;
-}
-
-void CScene::initialize()
-{
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glEnable(GL_CULL_FACE);
-
-  // create shader
-  m_shader = new QOpenGLShaderProgram();
-  m_shader->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/simple.vert");
-  m_shader->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/simple.frag");
-  m_shader->link();
-  m_shader->bind();
-
-  // cache uniform locations
-  u_modelToWorld = m_shader->uniformLocation("modelToWorld");
-  u_worldToView = m_shader->uniformLocation("worldToView");
-  m_shader->setUniformValue(u_worldToView, m_projection);
-
-  // create buffer
   m_buffer.create();
   m_buffer.bind();
   m_buffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
   m_buffer.allocate(sg_verts, sizeof(sg_verts));
 
-  // create vertex array object
   m_vao.create();
   m_vao.bind();
   m_shader->enableAttributeArray(0);
   m_shader->enableAttributeArray(1);
   m_shader->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
   m_shader->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
-
-  // release (unbind) all
   m_vao.release();
   m_buffer.release();
-  //m_shader->release();
 }
 
-void CScene::resize(int width, int height)
+CBox::~CBox()
 {
-  m_projection.setToIdentity();
-  m_projection.perspective(30.0f, width / float(height), 0.0f, 100.0f);
+  m_vao.destroy();
+  m_buffer.destroy();
 }
 
-void CScene::draw()
+void CBox::draw()
 {
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  // render using shaders
-  //m_shader->bind();
-  m_shader->setUniformValue(u_worldToView, m_projection);
-  m_shader->setUniformValue(u_modelToWorld, m_transform.toMatrix());
   m_vao.bind();
   glDrawArrays(GL_TRIANGLES, 0, sizeof(sg_verts) / sizeof(sg_verts[0]));
   m_vao.release();
-  //m_shader->release();
-}
-
-void CScene::animation_tick(int elapsed_time)
-{
-  m_transform.rotate(elapsed_time / ROTSP, QVector3D(0.4f, 0.3f, 0.3f));
 }

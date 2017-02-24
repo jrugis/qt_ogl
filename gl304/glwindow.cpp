@@ -11,7 +11,6 @@ GLWindow::GLWindow()
 {
   animation_timer = new QTimer(this);
   connect(animation_timer, SIGNAL(timeout()), this, SLOT(animation_tick()));
-  m_scene01 = new CScene();
 }
 
 GLWindow::~GLWindow()
@@ -27,7 +26,7 @@ void GLWindow::initializeGL()
   qDebug() << "OpenGL" << (const char*)glGetString(GL_VERSION);
   qDebug() << "GLSL" << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 
-  m_scene01->initialize();
+  m_scene01 = new CScene();
   animation_timer->start(AP);
   //m_elapsed_time.restart();
 }

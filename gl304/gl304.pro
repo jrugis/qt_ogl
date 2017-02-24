@@ -1,6 +1,6 @@
 QT += core gui opengl
 
-TARGET = gl303
+TARGET = gl304
 CONFIG += c++11
 
 TEMPLATE = app
@@ -8,12 +8,14 @@ TEMPLATE = app
 SOURCES += main.cpp \
     glwindow.cpp \
     transform3d.cpp \
-    scene.cpp
+    scene.cpp \
+    box.cpp
 HEADERS += \
     glwindow.h \
     vertex.h \
     transform3d.h \
-    scene.h
+    scene.h \
+    box.h
 
 win32 {
     LIBS += opengl32.lib

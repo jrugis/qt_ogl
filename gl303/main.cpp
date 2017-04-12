@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
   QSurfaceFormat::setDefaultFormat(format);
 
   GLWindow main_window;
-  main_window.setTitle("gl301");
+  main_window.setTitle("gl303");
   main_window.resize(QSize(800,600));
   main_window.show();
 

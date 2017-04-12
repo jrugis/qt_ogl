@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include <QDebug>
 #include <QExposeEvent>
 #include <QString>
@@ -11,6 +12,7 @@ GLWindow::GLWindow()
 {
   animation_timer = new QTimer(this);
   connect(animation_timer, SIGNAL(timeout()), this, SLOT(animation_tick()));
+  animate = true;
 }
 
 GLWindow::~GLWindow()
@@ -49,3 +51,23 @@ void GLWindow::animation_tick()
   m_scene01->animation_tick(ARR);
   QOpenGLWindow::update(); // schedule paint
 }
+
+void GLWindow::keyPressEvent(QKeyEvent *e)
+{
+  if(e->text() == "A") {
+    animate ^= 1;
+    if(animate) animation_timer->start(AP);
+    else animation_timer->stop();
+  }
+  if(e->text() == "P") {
+    m_scene01->m_parallel ^= 1;
+    m_scene01->resize(this->width(), this->height());
+    this->update();
+  }
+  if(e->key() == Qt::Key_Escape) {
+    QCoreApplication::exit(0);
+  }
+        else QOpenGLWindow::keyPressEvent(e);
+}
+
+

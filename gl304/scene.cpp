@@ -7,6 +7,11 @@ CScene::CScene()
 {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_CULL_FACE);
+  //glCullFace(GL_BACK);
+  //glFrontFace(GL_CCW);
+  glEnable(GL_LINE_SMOOTH);
+
+  m_parallel = false;
 
   m_shader = new QOpenGLShaderProgram();
   m_shader->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/simple.vert");
@@ -14,10 +19,10 @@ CScene::CScene()
   m_shader->link();
   m_shader->bind();
 
-  u_modelToWorld = m_shader->uniformLocation("modelToWorld");
-  u_worldToView = m_shader->uniformLocation("worldToView");
+  u_world = m_shader->uniformLocation("world");
+  u_view = m_shader->uniformLocation("view");
 
-  m_transform.translate(0.0f, 0.0f, -5.0f);
+  m_transform.translate(0.0f, 0.0f, -4.0f);
   m_box01 = new CBox(m_shader);
 }
 
@@ -30,16 +35,24 @@ CScene::~CScene()
 
 void CScene::resize(int width, int height)
 {
+  float wh = width / float(height);
   m_projection.setToIdentity();
-  m_projection.perspective(30.0f, width / float(height), 0.0f, 100.0f);
-  m_shader->setUniformValue(u_worldToView, m_projection);
+  if(m_parallel)
+    m_projection.ortho(-wh, wh, -1.0f, 1.0f,  10.0f, -10.0f);
+  else
+    m_projection.perspective(30.0f, width / float(height), 0.0f, 100.0f);
+  m_shader->setUniformValue(u_view, m_projection);
 }
 
 void CScene::draw()
 {
   glClear(GL_COLOR_BUFFER_BIT);
-  m_shader->setUniformValue(u_modelToWorld, m_transform.toMatrix());
+  m_shader->setUniformValue(u_world, m_transform.toMatrix());
+
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glLineWidth(2);
   m_box01->draw();
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void CScene::animation_tick(int elapsed_time)

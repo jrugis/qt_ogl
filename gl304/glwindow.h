@@ -22,6 +22,7 @@ protected:
   void initializeGL();
   void resizeGL(int width, int height);
   void paintGL();
+  void keyPressEvent(QKeyEvent *e);
 
 private slots:
   void animation_tick();
@@ -32,6 +33,7 @@ private:
   //QTime m_elapsed_time;
   QTimer *animation_timer;
   CScene *m_scene01;
+  bool animate;
 };
 
 #endif // GLWINDOW_H

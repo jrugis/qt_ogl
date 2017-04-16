@@ -4,7 +4,6 @@
 #include <QOpenGLWindow>
 #include <QOpenGLFunctions>
 #include <QTimer>
-//#include <QTime>
 
 #include "scene.h"
 

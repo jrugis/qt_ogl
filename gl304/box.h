@@ -7,8 +7,6 @@
 
 #include "vertex.h"
 
-class QOpenGLShaderProgram;
-
 class CBox
 {
 public:

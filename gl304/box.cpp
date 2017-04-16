@@ -13,23 +13,17 @@
 #define VERTEX_BBR Vertex( QVector3D( 0.5f, -0.5f, -0.5f), QVector3D( 1.0f, 1.0f, 1.0f ) )
 // colored cube
 static const Vertex sg_verts[] = {
-  // face 1 (front)
-    VERTEX_FTR, VERTEX_FTL, VERTEX_FBL,
+    VERTEX_FTR, VERTEX_FTL, VERTEX_FBL, // face 1 (front)
     VERTEX_FBL, VERTEX_FBR, VERTEX_FTR,
-  // face 2 (back)
-    VERTEX_BBR, VERTEX_BTL, VERTEX_BTR,
+    VERTEX_BBR, VERTEX_BTL, VERTEX_BTR, // face 2 (back)
     VERTEX_BTL, VERTEX_BBR, VERTEX_BBL,
-  // face 3 (top)
-    VERTEX_FTR, VERTEX_BTR, VERTEX_BTL,
+    VERTEX_FTR, VERTEX_BTR, VERTEX_BTL, // face 3 (top)
     VERTEX_BTL, VERTEX_FTL, VERTEX_FTR,
-  // face 4 (bottom)
-    VERTEX_FBR, VERTEX_FBL, VERTEX_BBL,
+    VERTEX_FBR, VERTEX_FBL, VERTEX_BBL, // face 4 (bottom)
     VERTEX_BBL, VERTEX_BBR, VERTEX_FBR,
-  // face 5 (left)
-    VERTEX_FBL, VERTEX_FTL, VERTEX_BTL,
+    VERTEX_FBL, VERTEX_FTL, VERTEX_BTL, // face 5 (left)
     VERTEX_FBL, VERTEX_BTL, VERTEX_BBL,
-  // face 6 (right)
-    VERTEX_FTR, VERTEX_FBR, VERTEX_BBR,
+    VERTEX_FTR, VERTEX_FBR, VERTEX_BBR, // face 6 (right)
     VERTEX_BBR, VERTEX_BTR, VERTEX_FTR
 };
 #undef VERTEX_BBR
@@ -58,6 +52,7 @@ CBox::CBox(QOpenGLShaderProgram *shader)
   m_shader->setAttributeBuffer(0, GL_FLOAT, Vertex::positionOffset(), Vertex::PositionTupleSize, Vertex::stride());
   m_shader->setAttributeBuffer(1, GL_FLOAT, Vertex::colorOffset(), Vertex::ColorTupleSize, Vertex::stride());
   m_vao.release();
+
   m_buffer.release();
 }
 

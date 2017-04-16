@@ -33,21 +33,15 @@ void GLWindow::initializeGL()
 
 void GLWindow::keyPressEvent(QKeyEvent *e)
 {
-  if(e->text() == "1") {
-    m_scene01->toggle_plot();
-    QOpenGLWindow::update(); // schedule paint
-  }
   if(e->text() == "A") {
     animate ^= 1;
     if(animate) animation_timer->start(AP);
     else animation_timer->stop();
   }
-  if(e->text() == "B") {
-    m_scene01->toggle_background();
-    QOpenGLWindow::update(); // schedule paint
-  }
-  if(e->text() == "P") {
-    m_scene01->toggle_projection();
+  if(e->text() == "R") {
+    animate = false;
+    animation_timer->stop();
+    m_scene01->reset();
     QOpenGLWindow::update(); // schedule paint
   }
   if(e->key() == Qt::Key_Escape) {
@@ -71,6 +65,3 @@ void GLWindow::animation_tick()
   m_scene01->animation_tick(ARR);
   QOpenGLWindow::update(); // schedule paint
 }
-
-
-

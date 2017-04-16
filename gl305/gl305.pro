@@ -1,6 +1,6 @@
 QT += core gui opengl
 
-TARGET = gl304
+TARGET = gl305
 CONFIG += c++11
 
 TEMPLATE = app
@@ -8,13 +8,10 @@ TEMPLATE = app
 SOURCES += main.cpp \
     glwindow.cpp \
     scene.cpp \
-    box.cpp \
     plot.cpp
 HEADERS += \
     glwindow.h \
-    vertex.h \
     scene.h \
-    box.h \
     plot.h
 
 win32 {

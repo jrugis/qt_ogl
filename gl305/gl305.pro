@@ -12,7 +12,8 @@ SOURCES += main.cpp \
 HEADERS += \
     glwindow.h \
     scene.h \
-    plot.h
+    plot.h \
+    constants.h
 
 win32 {
     LIBS += opengl32.lib

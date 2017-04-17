@@ -13,6 +13,8 @@ public:
   CPlot(QOpenGLShaderProgram *shader);
   ~CPlot();
   void draw();
+  void move_source(int x, int y);
+  void reset();
 
 private:
   QOpenGLShaderProgram *shader;
@@ -20,6 +22,10 @@ private:
   QOpenGLBuffer vbo_axis, vbo_data;
   QOpenGLVertexArrayObject vao_axis, vao_data;
   int n_data_verts;
+  QVector3D source;
+  QVector3D source_translate;
+
+  void calc();
 };
 
 #endif // PLOT_H

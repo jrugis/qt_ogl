@@ -1,16 +1,12 @@
 #include <functional>
 
+#include "constants.h"
 #include "scene.h"
-
-#define ROTSP 50.0f // animation rotation speed (milli-seconds per degree)
 
 CScene::CScene()
 {
-  glEnable(GL_LINE_SMOOTH);
-  glEnable(GL_POINT_SMOOTH);
-  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-  reset();
+  dark_background = true;
+  toggle_background();
 
   shader01 = new QOpenGLShaderProgram();
   shader01->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/001.vert");
@@ -22,6 +18,7 @@ CScene::CScene()
   u_model2world = shader01->uniformLocation("model2world");
 
   plot01 = new CPlot(shader01);
+  reset();
 }
 
 CScene::~CScene()
@@ -54,11 +51,17 @@ void CScene::draw()
   plot01->draw();
 }
 
+void CScene::move_source(int x, int y)
+{
+  plot01->move_source(x, y);
+}
+
 void CScene::reset()
 {
   angle = 0.0f;    // for positioning the world in camera space
   tilt = 0.0f;     //
   offset = -5.0f;  //
+  plot01->reset();
 }
 
 void CScene::set_canvas_size(int w, int h)
@@ -75,3 +78,11 @@ void CScene::set_projection()
   camera2view.perspective(20.0f, wh, 0.0f, 10.0f);
   shader01->setUniformValue(u_camera2view, camera2view);
 }
+
+void CScene::toggle_background()
+{
+  dark_background ^= 1;
+  if(dark_background) glClearColor(BLACK3, 1.0f);
+  else glClearColor(WHITE3, 1.0f);
+}
+

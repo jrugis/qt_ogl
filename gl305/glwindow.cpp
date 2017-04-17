@@ -38,6 +38,26 @@ void GLWindow::keyPressEvent(QKeyEvent *e)
     if(animate) animation_timer->start(AP);
     else animation_timer->stop();
   }
+  if(e->text() == "B") {
+    m_scene01->toggle_background();
+    QOpenGLWindow::update(); // schedule paint
+  }
+  if(e->key() == Qt::Key_Left) {
+    m_scene01->move_source(-1, 0);
+    QOpenGLWindow::update(); // schedule paint
+  }
+  if(e->key() == Qt::Key_Right) {
+    m_scene01->move_source(1, 0);
+    QOpenGLWindow::update(); // schedule paint
+  }
+  if(e->key() == Qt::Key_Up) {
+    m_scene01->move_source(0, 1);
+    QOpenGLWindow::update(); // schedule paint
+  }
+  if(e->key() == Qt::Key_Down) {
+    m_scene01->move_source(0, -1);
+    QOpenGLWindow::update(); // schedule paint
+  }
   if(e->text() == "R") {
     animate = false;
     animation_timer->stop();

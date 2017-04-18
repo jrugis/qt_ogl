@@ -3,10 +3,8 @@
 #include <QExposeEvent>
 #include <QString>
 
+#include "constants.h"
 #include "glwindow.h"
-
-#define ARR 29.0         // ANIMATE_REFRESH_RATE
-#define AP (1000.0/ARR)  // ANIMATE_PERIOD (ms)
 
 GLWindow::GLWindow()
 {
@@ -33,41 +31,43 @@ void GLWindow::initializeGL()
 
 void GLWindow::keyPressEvent(QKeyEvent *e)
 {
-  if(e->text() == "A") {
+  if(e->text() == "a") {
     animate ^= 1;
-    if(animate) animation_timer->start(AP);
+    if(animate) animation_timer->start(ANIMATE_PERIOD);
     else animation_timer->stop();
   }
-  if(e->text() == "B") {
+  if(e->text() == "b") {
     m_scene01->toggle_background();
     QOpenGLWindow::update(); // schedule paint
   }
-  if(e->key() == Qt::Key_Left) {
-    m_scene01->move_source(-1, 0);
-    QOpenGLWindow::update(); // schedule paint
-  }
-  if(e->key() == Qt::Key_Right) {
-    m_scene01->move_source(1, 0);
-    QOpenGLWindow::update(); // schedule paint
-  }
-  if(e->key() == Qt::Key_Up) {
-    m_scene01->move_source(0, 1);
-    QOpenGLWindow::update(); // schedule paint
-  }
-  if(e->key() == Qt::Key_Down) {
-    m_scene01->move_source(0, -1);
-    QOpenGLWindow::update(); // schedule paint
-  }
-  if(e->text() == "R") {
+  if(e->text() == "r") {
     animate = false;
     animation_timer->stop();
     m_scene01->reset();
     QOpenGLWindow::update(); // schedule paint
   }
-  if(e->key() == Qt::Key_Escape) {
+  //if(e->key() == Qt::Key_Escape) {
+  if(e->text() == "x") {
     QCoreApplication::exit(0);
   }
   else QOpenGLWindow::keyPressEvent(e);
+}
+
+void GLWindow::mouseMoveEvent(QMouseEvent *event)
+{
+  int dx = event->x() - lastPos.x();
+  int dy = event->y() - lastPos.y();
+
+  if(event->buttons() & Qt::LeftButton){
+    if(event->modifiers().testFlag(Qt::ShiftModifier)){
+      if(event->modifiers().testFlag(Qt::ControlModifier))
+        m_scene01->move_source(0, -dy);
+      else m_scene01->move_source(dx, 0);
+    }
+    else m_scene01->move_source(dx, -dy);
+    QOpenGLWindow::update(); // schedule paint
+  }
+  lastPos = event->pos();
 }
 
 void GLWindow::paintGL()
@@ -82,6 +82,7 @@ void GLWindow::resizeGL(int width, int height)
 
 void GLWindow::animation_tick()
 {
-  m_scene01->animation_tick(ARR);
+  m_scene01->animation_tick(elapsed_time.elapsed());
+  elapsed_time.restart();
   QOpenGLWindow::update(); // schedule paint
 }

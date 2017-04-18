@@ -56,6 +56,24 @@ void GLWindow::keyPressEvent(QKeyEvent *e)
   else QOpenGLWindow::keyPressEvent(e);
 }
 
+void GLWindow::mouseMoveEvent(QMouseEvent *event)
+{
+  int dx = event->x() - lastPos.x();
+  int dy = event->y() - lastPos.y();
+
+  if(event->buttons() & Qt::LeftButton) {
+    rotate_angle += dx * RDS;
+    if(rotate_angle > ROTATE_MAX) rotate_angle -= 360.0;
+    if(rotate_angle < ROTATE_MIN) rotate_angle += 360.0;
+
+    tilt_angle += dy * RDS;
+    if(tilt_angle > TILT_MAX) tilt_angle = TILT_MAX;
+    if(tilt_angle < TILT_MIN) tilt_angle = TILT_MIN;
+    updateGL();
+  }
+  lastPos = event->pos();
+}
+
 void GLWindow::paintGL()
 {
   m_scene01->draw();

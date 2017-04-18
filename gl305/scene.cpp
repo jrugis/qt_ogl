@@ -30,7 +30,7 @@ CScene::~CScene()
 
 void CScene::animation_tick(int elapsed_time)
 {
-  angle += elapsed_time/ROTSP;
+  angle += elapsed_time / ANIMATE_MS_DEGREE;
   if(angle > 180.0f) angle -= 360.0f;
   if(angle < -180.0f) angle += 360.0f;
 }
@@ -45,8 +45,8 @@ void CScene::draw()
   shader01->setUniformValue(u_world2camera, world2camera);
 
   model2world.setToIdentity();
-  model2world.scale(1.5f);
-  model2world.translate(-0.5f, -0.5f, 0.0f);
+  model2world.scale(MODEL2WORLD_SCALE);
+  model2world.translate(MODEL2WORLD_TRANSLATE);
   shader01->setUniformValue(u_model2world, model2world);
   plot01->draw();
 }
@@ -75,7 +75,7 @@ void CScene::set_projection()
 {
   float wh = static_cast<float>(width) / height;
   camera2view.setToIdentity();
-  camera2view.perspective(20.0f, wh, 0.0f, 10.0f);
+  camera2view.perspective(CAMERA2VIEW_PERSPECTIVE);
   shader01->setUniformValue(u_camera2view, camera2view);
 }
 

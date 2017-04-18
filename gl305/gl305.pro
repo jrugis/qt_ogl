@@ -1,7 +1,7 @@
 QT += core gui opengl
 
 TARGET = gl305
-CONFIG += c++11
+CONFIG += c++14
 
 TEMPLATE = app
 

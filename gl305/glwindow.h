@@ -4,6 +4,7 @@
 #include <QOpenGLWindow>
 #include <QOpenGLFunctions>
 #include <QTimer>
+#include <QTime>
 
 #include "scene.h"
 
@@ -20,6 +21,7 @@ public:
 protected:
   void initializeGL();
   void keyPressEvent(QKeyEvent *e);
+  void mouseMoveEvent(QMouseEvent *event);
   void paintGL();
   void resizeGL(int width, int height);
 
@@ -31,6 +33,8 @@ signals:
 private:
   bool animate;
   QTimer *animation_timer;
+  QTime elapsed_time;
+  QPoint lastPos;
   CScene *m_scene01;
 };
 

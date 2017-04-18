@@ -5,8 +5,6 @@
 
 #include "plot.h"
 
-#define ROTSP 50.0f // animation rotation speed (milli-seconds per degree)
-
 class QOpenGLShaderProgram;
 
 class CScene

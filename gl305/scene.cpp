@@ -55,6 +55,10 @@ void CScene::move_source(int x, int y)
 {
   plot01->move_source(x, y);
 }
+void CScene::plot_range(bool increase)
+{
+  plot01->range(increase);
+}
 
 void CScene::reset()
 {

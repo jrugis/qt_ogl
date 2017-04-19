@@ -7,31 +7,35 @@ CPlot::CPlot(QOpenGLShaderProgram *s)
 {
   shader = s;
   u_color = shader->uniformLocation("color");
+  plot_range = PLOT_RANGE;
+  plot_zero = std::complex<double>(PLOT_ZERO);
 
   // axis vertices
-  const int pr_int = static_cast<int>(PLOT_RANGE)+1;
-  const float pr_float = static_cast<float>(PLOT_RANGE);
-  QVector3D axis_verts[4*(pr_int+1)];
-  for(int i=0; i<pr_int; i++){
+  QVector3D *axis_verts = new QVector3D[4*(plot_range+1)];
+  const float pr_float = static_cast<float>(plot_range); // convenience typecast
+  for(int i=0; i<plot_range+1; i++){
     // horizontal lines
     axis_verts[2*i]            = QVector3D(0.0f, i/pr_float, 0.0f);
     axis_verts[2*i+1]          = QVector3D(1.0f, i/pr_float, 0.0f);
     // vertical lines
-    axis_verts[2*pr_int+2*i]   = QVector3D(i/pr_float, 0.0f, 0.0f);
-    axis_verts[2*pr_int+2*i+1] = QVector3D(i/pr_float, 1.0f, 0.0f);
+    axis_verts[2*(plot_range+1)+2*i]   = QVector3D(i/pr_float, 0.0f, 0.0f);
+    axis_verts[2*(plot_range+1)+2*i+1] = QVector3D(i/pr_float, 1.0f, 0.0f);
   }
+  qDebug() << "plot_range" << 4*(plot_range+1);
+  qDebug() << "HI" << sizeof(axis_verts);
 
   // axis vbo, vao
   vbo_axis.create();  // vbo
   vbo_axis.bind();
   vbo_axis.setUsagePattern(QOpenGLBuffer::StaticDraw);
-  vbo_axis.allocate(axis_verts, sizeof(axis_verts));
+  vbo_axis.allocate(axis_verts, 4*(plot_range+1) * sizeof(axis_verts[0]));
   vao_axis.create();  // vao
   vao_axis.bind();
   shader->enableAttributeArray(0);
   shader->setAttributeBuffer(0, GL_FLOAT, 0, 3);
   vao_axis.release();
   vbo_axis.release();
+  delete[] axis_verts;
 
   // data vbo, vao
   const QVector3D data_verts[MAX_DATA_VERTS] = {};
@@ -55,8 +59,8 @@ CPlot::CPlot(QOpenGLShaderProgram *s)
   n_dest_verts = n_source_verts = 5;
 
   // set plot scale and calculate clamp limits
-  plot_scale = 1.0 / PLOT_RANGE;
-  plot_offset = std::complex<double>(PLOT_ZERO) / PLOT_RANGE;
+  plot_scale = 1.0 / plot_range;
+  plot_offset = plot_zero * plot_scale;
   re_lo = -plot_offset.real() / plot_scale;
   re_hi = (1.0 - plot_offset.real()) / plot_scale;
   im_lo = -plot_offset.imag() / plot_scale;
@@ -119,12 +123,12 @@ void CPlot::draw()
   vao_axis.bind();
   shader->setUniformValue(u_color, QVector4D(MED_GRAY, 1.0f));
   glDrawArrays(GL_LINES, 0, 2);                  // bottom
-  glDrawArrays(GL_LINES, 2*(PLOT_RANGE+1)-2, 4); // top, left
-  glDrawArrays(GL_LINES, 4*(PLOT_RANGE+1)-2, 2); // right
+  glDrawArrays(GL_LINES, 2*(plot_range+1)-2, 4); // top, left
+  glDrawArrays(GL_LINES, 4*(plot_range+1)-2, 2); // right
   // horizontal and vertical grid lines
   shader->setUniformValue(u_color, QVector4D(VERY_LIGHT_GRAY, 1.0f));
-  glDrawArrays(GL_LINES, 2, 2*(PLOT_RANGE-1));
-  glDrawArrays(GL_LINES, 2*(PLOT_RANGE+1)+2, 2*(PLOT_RANGE-1));
+  glDrawArrays(GL_LINES, 2, 2*(plot_range-1));
+  glDrawArrays(GL_LINES, 2*(plot_range+1)+2, 2*(plot_range-1));
   vao_axis.release();
 
   // draw data: source
@@ -156,6 +160,12 @@ void CPlot::move_source(int x, int y)
   im = im < im_lo ? im_lo : im;
   source_translate = std::complex<double>(re, im);
   calc();
+}
+
+void CPlot::range(bool increase)
+{
+  if(increase) plot_range += 2;
+  else plot_range -= 2;
 }
 
 void CPlot::reset()

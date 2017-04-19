@@ -6,7 +6,7 @@
 #define ANIMATE_MS_DEGREE 50.0
 
 #define MAX_DATA_VERTS 100
-#define PLOT_RANGE 10.0
+#define PLOT_RANGE 10
 #define PLOT_ZERO 5.0, 5.0
 
 #define MAX_SOURCE_VALS 100

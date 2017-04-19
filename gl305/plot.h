@@ -16,6 +16,7 @@ public:
   ~CPlot();
   void draw();
   void move_source(int x, int y);
+  void range(bool increase);
   void reset();
 
 private:
@@ -24,6 +25,8 @@ private:
   QOpenGLBuffer vbo_axis, vbo_data;
   QOpenGLVertexArrayObject vao_axis, vao_data;
 
+  int plot_range;
+  std::complex<double> plot_zero;
   double plot_scale;
   std::complex<double> plot_offset;
   double re_lo, re_hi, im_lo, im_hi; // clamp limits

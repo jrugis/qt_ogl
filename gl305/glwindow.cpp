@@ -31,6 +31,10 @@ void GLWindow::initializeGL()
 
 void GLWindow::keyPressEvent(QKeyEvent *e)
 {
+  if(e->text() == "+") {
+    m_scene01->plot_range(true);
+    QOpenGLWindow::update(); // schedule paint
+  }
   if(e->text() == "a") {
     animate ^= 1;
     if(animate) animation_timer->start(ANIMATE_PERIOD);

@@ -5,6 +5,9 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 #include <complex>
+#include <vector>
+
+#include "constants.h"
 
 class CPlot
 {
@@ -25,9 +28,10 @@ private:
   std::complex<double> plot_offset;
   double re_lo, re_hi, im_lo, im_hi; // clamp limits
 
-  std::complex<double> source;
+  std::complex<double> source[MAX_SOURCE_VALS];
   std::complex<double> source_translate;
   int n_source_verts, n_dest_verts;
+  bool show_dest;
 
   void calc();
 };

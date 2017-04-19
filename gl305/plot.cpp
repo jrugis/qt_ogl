@@ -46,9 +46,13 @@ CPlot::CPlot(QOpenGLShaderProgram *s)
   vao_data.release();
   vbo_data.release();
 
-  // source data
-  source = std::complex<double>(0.0, 0.0);
-  n_dest_verts = n_source_verts = 1;
+  // source data: centered cross shape
+  source[0] = std::complex<double>( 0.0,  0.0);
+  source[1] = std::complex<double>( 0.1,  0.0);
+  source[2] = std::complex<double>( 0.0,  0.1);
+  source[3] = std::complex<double>(-0.1,  0.0);
+  source[4] = std::complex<double>( 0.0, -0.1);
+  n_dest_verts = n_source_verts = 5;
 
   // set plot scale and calculate clamp limits
   plot_scale = 1.0 / PLOT_RANGE;
@@ -69,28 +73,37 @@ CPlot::~CPlot()
 
 void CPlot::calc()
 {
-  // transform the source
-  std::complex<double> s, d;
-  s = source + source_translate;
+  // transform the source  
+  std::complex<double> s[5];
+  for(int i=0; i<n_source_verts; i++)
+    s[i] = source[i] + source_translate;
 
   // source->destination mapping
-  d = std::pow(s, 2);
-  //d = std::sin(s);
+  n_dest_verts = n_source_verts;
+  std::complex<double> d[5];
+  for(int i=0; i<n_source_verts; i++)
+    d[i] = std::pow(s[i], 2);
+    //d[i] = std::sin(s[i]);
 
   // destination range check
-  n_dest_verts = 1;
-  double re = d.real(); // hide out-of-range?
-  if((re < re_lo) or (re > re_hi)) n_dest_verts = 0;
-  double im = d.imag(); // hide out-of-range?
-  if((im < im_lo) or (im > im_hi)) n_dest_verts = 0;
+  show_dest = true;
+  double re = d[0].real(); // hide out-of-range?
+  if((re < re_lo) or (re > re_hi)) show_dest = false;
+  double im = d[0].imag(); // hide out-of-range?
+  if((im < im_lo) or (im > im_hi)) show_dest = false;
 
   // transform and push to vbo
-  s = s * plot_scale + plot_offset;
-  d = d * plot_scale + plot_offset;
-  QVector3D buf[] ={
-    QVector3D(s.real(), s.imag(), 0.0f),
-    QVector3D(d.real(), d.imag(), 0.0f)
-  };
+  for(int i=0; i<n_source_verts; i++){
+    s[i] = s[i] * plot_scale + plot_offset;
+    d[i] = d[i] * plot_scale + plot_offset;
+  }
+  QVector3D buf[16]; // as line segment vertices
+  for(int i=0; i<4; i++){
+    buf[2*i]   = QVector3D(s[0].real(),   s[0].imag(),   0.0f);
+    buf[2*i+1] = QVector3D(s[i+1].real(), s[i+1].imag(), 0.0f);
+    buf[2*i+8] = QVector3D(d[0].real(),   d[0].imag(),   0.0f);
+    buf[2*i+9] = QVector3D(d[i+1].real(), d[i+1].imag(), 0.0f);
+  }
   vbo_data.bind();
   vbo_data.write(0, &buf, sizeof(buf));
   vbo_data.release();
@@ -117,15 +130,17 @@ void CPlot::draw()
   // draw data: source
   vao_data.bind();
   shader->setUniformValue(u_color, QVector4D(GREEN, 1.0f));
-  glPointSize(6.0f);
-  glDrawArrays(GL_POINTS, 0, n_source_verts);     // points
-  glDrawArrays(GL_LINE_STRIP, 0, n_source_verts); // lines
+  glPointSize(3.0f);
+  glDrawArrays(GL_LINES, 0, 8);  // lines
+  glDrawArrays(GL_POINTS, 1, 1); // points
 
   // draw data: destination
-  shader->setUniformValue(u_color, QVector4D(BLUE, 1.0f));
-  glPointSize(6.0f);
-  glDrawArrays(GL_POINTS, n_source_verts, n_dest_verts);     // points
-  glDrawArrays(GL_LINE_STRIP, n_source_verts, n_dest_verts); // lines
+  if(show_dest){
+    shader->setUniformValue(u_color, QVector4D(BLUE, 1.0f));
+    glPointSize(3.0f);
+    glDrawArrays(GL_LINES, 8, 8); // lines
+    glDrawArrays(GL_POINTS, 9, 1); // points
+  }
   vao_data.release();
 }
 

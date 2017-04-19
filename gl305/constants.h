@@ -9,6 +9,8 @@
 #define PLOT_RANGE 10.0
 #define PLOT_ZERO 5.0, 5.0
 
+#define MAX_SOURCE_VALS 100
+
 #define CAMERA2VIEW_PERSPECTIVE 20.0f, wh, 0.0f, 10.0f
 #define MODEL2WORLD_SCALE 1.5f
 #define MODEL2WORLD_TRANSLATE -0.5f, -0.5f, 0.0f

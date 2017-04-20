@@ -10,62 +10,8 @@ CPlot::CPlot(QOpenGLShaderProgram *s)
   plot_range = PLOT_RANGE;
   plot_zero = std::complex<double>(PLOT_ZERO);
 
-  // axis vertices
-  QVector3D *axis_verts = new QVector3D[4*(plot_range+1)];
-  const float pr_float = static_cast<float>(plot_range); // convenience typecast
-  for(int i=0; i<plot_range+1; i++){
-    // horizontal lines
-    axis_verts[2*i]            = QVector3D(0.0f, i/pr_float, 0.0f);
-    axis_verts[2*i+1]          = QVector3D(1.0f, i/pr_float, 0.0f);
-    // vertical lines
-    axis_verts[2*(plot_range+1)+2*i]   = QVector3D(i/pr_float, 0.0f, 0.0f);
-    axis_verts[2*(plot_range+1)+2*i+1] = QVector3D(i/pr_float, 1.0f, 0.0f);
-  }
-  qDebug() << "plot_range" << 4*(plot_range+1);
-  qDebug() << "HI" << sizeof(axis_verts);
-
-  // axis vbo, vao
-  vbo_axis.create();  // vbo
-  vbo_axis.bind();
-  vbo_axis.setUsagePattern(QOpenGLBuffer::StaticDraw);
-  vbo_axis.allocate(axis_verts, 4*(plot_range+1) * sizeof(axis_verts[0]));
-  vao_axis.create();  // vao
-  vao_axis.bind();
-  shader->enableAttributeArray(0);
-  shader->setAttributeBuffer(0, GL_FLOAT, 0, 3);
-  vao_axis.release();
-  vbo_axis.release();
-  delete[] axis_verts;
-
-  // data vbo, vao
-  const QVector3D data_verts[MAX_DATA_VERTS] = {};
-  vbo_data.create();  // vbo
-  vbo_data.bind();
-  vbo_data.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-  vbo_data.allocate(data_verts, sizeof(data_verts));
-  vao_data.create();  // vao
-  vao_data.bind();
-  shader->enableAttributeArray(0);
-  shader->setAttributeBuffer(0, GL_FLOAT, 0, 3);
-  vao_data.release();
-  vbo_data.release();
-
-  // source data: centered cross shape
-  source[0] = std::complex<double>( 0.0,  0.0);
-  source[1] = std::complex<double>( 0.1,  0.0);
-  source[2] = std::complex<double>( 0.0,  0.1);
-  source[3] = std::complex<double>(-0.1,  0.0);
-  source[4] = std::complex<double>( 0.0, -0.1);
-  n_dest_verts = n_source_verts = 5;
-
-  // set plot scale and calculate clamp limits
-  plot_scale = 1.0 / plot_range;
-  plot_offset = plot_zero * plot_scale;
-  re_lo = -plot_offset.real() / plot_scale;
-  re_hi = (1.0 - plot_offset.real()) / plot_scale;
-  im_lo = -plot_offset.imag() / plot_scale;
-  im_hi = (1.0 - plot_offset.imag()) / plot_scale;
-
+  setup_axis();
+  setup_data();
   reset();
 }
 
@@ -164,8 +110,78 @@ void CPlot::move_source(int x, int y)
 
 void CPlot::range(bool increase)
 {
-  if(increase) plot_range += 2;
-  else plot_range -= 2;
+  if(increase){
+    plot_range += 2;
+    plot_zero += std::complex<double>(1.0, 1.0);
+  }
+  else{
+    plot_range -= 2;
+    plot_zero -= std::complex<double>(1.0, 1.0);
+  }
+  vao_axis.destroy();
+  vbo_axis.destroy();
+  setup_axis();
+  move_source(0, 0);
+}
+
+void CPlot::setup_axis()
+{
+  // axis vertices
+  QVector3D *axis_verts = new QVector3D[4*(plot_range+1)];
+  const float pr_float = static_cast<float>(plot_range); // convenience typecast
+  for(int i=0; i<plot_range+1; i++){
+    // horizontal lines
+    axis_verts[2*i]            = QVector3D(0.0f, i/pr_float, 0.0f);
+    axis_verts[2*i+1]          = QVector3D(1.0f, i/pr_float, 0.0f);
+    // vertical lines
+    axis_verts[2*(plot_range+1)+2*i]   = QVector3D(i/pr_float, 0.0f, 0.0f);
+    axis_verts[2*(plot_range+1)+2*i+1] = QVector3D(i/pr_float, 1.0f, 0.0f);
+  }
+
+  // axis vbo, vao
+  vbo_axis.create();  // vbo
+  vbo_axis.bind();
+  vbo_axis.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  vbo_axis.allocate(axis_verts, 4*(plot_range+1) * sizeof(axis_verts[0]));
+  vao_axis.create();  // vao
+  vao_axis.bind();
+  shader->enableAttributeArray(0);
+  shader->setAttributeBuffer(0, GL_FLOAT, 0, 3);
+  vao_axis.release();
+  vbo_axis.release();
+  delete[] axis_verts;
+
+  // set plot scale and calculate clamp limits
+  plot_scale = 1.0 / plot_range;
+  plot_offset = plot_zero * plot_scale;
+  re_lo = -plot_offset.real() / plot_scale;
+  re_hi = (1.0 - plot_offset.real()) / plot_scale;
+  im_lo = -plot_offset.imag() / plot_scale;
+  im_hi = (1.0 - plot_offset.imag()) / plot_scale;
+}
+
+void CPlot::setup_data()
+{
+  // data vbo, vao
+  const QVector3D data_verts[MAX_DATA_VERTS] = {};
+  vbo_data.create();  // vbo
+  vbo_data.bind();
+  vbo_data.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+  vbo_data.allocate(data_verts, sizeof(data_verts));
+  vao_data.create();  // vao
+  vao_data.bind();
+  shader->enableAttributeArray(0);
+  shader->setAttributeBuffer(0, GL_FLOAT, 0, 3);
+  vao_data.release();
+  vbo_data.release();
+
+  // source data: centered cross shape
+  source[0] = std::complex<double>( 0.0,  0.0);
+  source[1] = std::complex<double>( 0.1,  0.0);
+  source[2] = std::complex<double>( 0.0,  0.1);
+  source[3] = std::complex<double>(-0.1,  0.0);
+  source[4] = std::complex<double>( 0.0, -0.1);
+  n_dest_verts = n_source_verts = 5;
 }
 
 void CPlot::reset()

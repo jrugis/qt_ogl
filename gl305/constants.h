@@ -18,8 +18,8 @@
 #define BLACK3 0.0f, 0.0f, 0.0f
 #define WHITE3 1.0f, 1.0f, 1.0f
 
-#define VERY_LIGHT_GRAY 0.98f, 0.98f, 0.98f
-#define LIGHT_GRAY 0.9f, 0.9f, 0.9f
+#define VERY_LIGHT_GRAY 0.9f, 0.9f, 0.9f
+#define LIGHT_GRAY 0.8f, 0.8f, 0.8f
 #define MED_GRAY 0.6f, 0.6f, 0.6f
 #define DARK_GRAY 0.4f, 0.4f, 0.4f
 

@@ -37,6 +37,8 @@ private:
   bool show_dest;
 
   void calc();
+  void setup_axis();
+  void setup_data();
 };
 
 #endif // PLOT_H

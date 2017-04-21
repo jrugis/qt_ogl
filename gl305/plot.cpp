@@ -1,4 +1,9 @@
+#include <string>
 #include <QDebug>
+
+#define register // used by pari but deprecated in c++11
+#include <pari/pari.h>
+#undef register // used by pari but deprecated in c++11
 
 #include "constants.h"
 #include "plot.h"
@@ -28,12 +33,22 @@ void CPlot::calc()
   for(int i=0; i<n_source_verts; i++)
     s[i] = source[i] + source_translate;
 
-  // source->destination mapping
+  // apply source -> destination mapping
   n_dest_verts = n_source_verts;
   std::complex<double> d[5];
-  for(int i=0; i<n_source_verts; i++)
-    d[i] = std::pow(s[i], 2);
+  pari_sp psp = avma; // pari stack pointer
+  GEN x(cgetc(DEFAULTPREC)), z(cgetc(DEFAULTPREC)); // pari variables
+  for(int i=0; i<n_source_verts; i++){
+    //d[i] = std::pow(s[i], 2);
     //d[i] = std::sin(s[i]);
+    if(s[i] == std::complex<double>(1.0, 0.0)) return; // avoid zeta pole
+    x = gadd(dbltor(s[i].real()), gmul(dbltor(s[i].imag()), gen_I()));
+    z = gzeta(x, DEFAULTPREC); // pari zeta function
+    d[i] = std::complex<double>(gtodouble(greal(z)), gtodouble(gimag(z)));
+  }
+  avma = psp; // clear the pari stack
+  qDebug() << "s = (" << s[0].real() << "," << s[0].imag()
+           << ")   d = (" << d[0].real() << "," << d[0].imag() << ")";
 
   // destination range check
   show_dest = true;
@@ -181,7 +196,7 @@ void CPlot::setup_data()
   source[2] = std::complex<double>( 0.0,  0.1);
   source[3] = std::complex<double>(-0.1,  0.0);
   source[4] = std::complex<double>( 0.0, -0.1);
-  n_dest_verts = n_source_verts = 5;
+  n_source_verts = 5;
 }
 
 void CPlot::reset()

@@ -15,8 +15,15 @@ HEADERS += \
     plot.h \
     constants.h
 
-win32 {
-    LIBS += opengl32.lib
+INCLUDEPATH += \
+    /usr/local/include
+
+LIBS += \
+    -lpari \
+    -L/usr/local/lib
+
+win64 {
+    LIBS += opengl64.lib
 }
 
 DEFINES += QT_DEPRECATED_WARNINGS

@@ -57,6 +57,9 @@ void GLWindow::keyPressEvent(QKeyEvent *e)
     m_scene01->reset();
     QOpenGLWindow::update(); // schedule paint
   }
+  if(e->text() == "v") {
+    m_scene01->toggle_show_vals();
+  }
   //if(e->key() == Qt::Key_Escape) {
   if(e->text() == "x") {
     QCoreApplication::exit(0);
@@ -68,7 +71,6 @@ void GLWindow::mouseMoveEvent(QMouseEvent *event)
 {
   int dx = event->x() - lastPos.x();
   int dy = event->y() - lastPos.y();
-
   if(event->buttons() & Qt::LeftButton){
     if(event->modifiers().testFlag(Qt::ShiftModifier)){
       if(event->modifiers().testFlag(Qt::ControlModifier))

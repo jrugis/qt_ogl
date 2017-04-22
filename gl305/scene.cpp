@@ -17,7 +17,7 @@ CScene::CScene()
   u_world2camera = shader01->uniformLocation("world2camera");
   u_model2world = shader01->uniformLocation("model2world");
 
-  plot01 = new CPlot(shader01);
+  plot01 = new CPlotCross(shader01);
   reset();
 }
 
@@ -90,3 +90,7 @@ void CScene::toggle_background()
   else glClearColor(WHITE3, 1.0f);
 }
 
+void CScene::toggle_show_vals()
+{
+  plot01->toggle_show_vals();
+}

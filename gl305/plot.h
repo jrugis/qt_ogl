@@ -7,19 +7,18 @@
 #include <complex>
 #include <vector>
 
-#include "constants.h"
-
 class CPlot
 {
 public:
   CPlot(QOpenGLShaderProgram *shader);
-  ~CPlot();
-  void draw();
-  void move_source(int x, int y);
-  void range(bool increase);
-  void reset();
+  virtual ~CPlot();
+  virtual void draw() = 0;                     // pure virtual
+  virtual void move_source(int x, int y) = 0;  //
+  virtual void range(bool increase) = 0;       //
+  virtual void reset() = 0;                    //
+  virtual void toggle_show_vals() = 0;         //
 
-private:
+protected:
   QOpenGLShaderProgram *shader;
   int u_color;
   QOpenGLBuffer vbo_axis, vbo_data;
@@ -31,14 +30,12 @@ private:
   std::complex<double> plot_offset;
   double re_lo, re_hi, im_lo, im_hi; // clamp limits
 
-  std::complex<double> source[MAX_SOURCE_VALS];
   std::complex<double> source_translate;
-  int n_source_verts, n_dest_verts;
-  bool show_dest;
+  bool show_vals;
 
-  void calc();
-  void setup_axis();
-  void setup_data();
+  virtual void calc() = 0;         // pure virtual
+  virtual void setup_axis() = 0;   //
+  virtual void setup_data() = 0;   //
 };
 
 #endif // PLOT_H

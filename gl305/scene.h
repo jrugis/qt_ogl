@@ -3,7 +3,7 @@
 
 #include <QOpenGLShaderProgram>
 
-#include "plot.h"
+#include "plotcross.h"
 
 class QOpenGLShaderProgram;
 
@@ -19,6 +19,7 @@ public:
   void reset();
   void set_canvas_size(int width, int height);
   void toggle_background();
+  void toggle_show_vals();
 
 private:
   int width, height;   // opengl canvas size
@@ -31,7 +32,7 @@ private:
   QMatrix4x4 camera2view, world2camera, model2world;
   int u_camera2view, u_world2camera, u_model2world;
 
-  CPlot *plot01;
+  CPlotCross *plot01;
 
   void set_projection();
 };

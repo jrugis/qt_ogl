@@ -1,26 +1,32 @@
 QT += core gui opengl
 
 TARGET = gl305
-CONFIG += c++14
+CONFIG += c++11
 
 TEMPLATE = app
 
 SOURCES += main.cpp \
     glwindow.cpp \
     scene.cpp \
-    plot.cpp
+    plot.cpp \
+    plotcross.cpp \
+    plotstrip.cpp
+
 HEADERS += \
     glwindow.h \
     scene.h \
     plot.h \
-    constants.h
+    constants.h \
+    plotcross.h \
+    plotstrip.h
 
 INCLUDEPATH += \
     /usr/local/include
 
 LIBS += \
     -lpari \
-    -L/usr/local/lib
+    -L/usr/local/lib \
+    -v
 
 win64 {
     LIBS += opengl64.lib

@@ -1,6 +1,8 @@
 #ifndef PLOTCROSS_H
 #define PLOTCROSS_H
 
+#define MAX_DATA_VERTS 100
+
 #include "plot.h"
 
 class CPlotCross : public CPlot

@@ -1,7 +1,6 @@
 #include <string>
 #include <QDebug>
 
-#include "constants.h"
 #include "plot.h"
 
 CPlot::CPlot(QOpenGLShaderProgram *s)

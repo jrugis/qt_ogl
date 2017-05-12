@@ -1,6 +1,9 @@
 #ifndef PLOT_H
 #define PLOT_H
 
+#define PLOT_RANGE 10
+#define PLOT_ZERO 5.0, 5.0
+
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>

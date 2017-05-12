@@ -1,20 +1,6 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define N_SPIRAL_VERTS 21
-
-#define ANIMATE_REFRESH_RATE 29.0
-#define ANIMATE_PERIOD (1000.0 / ANIMATE_REFRESH_RATE)
-#define ANIMATE_MS_DEGREE 50.0
-
-#define MAX_DATA_VERTS 100
-#define PLOT_RANGE 10
-#define PLOT_ZERO 5.0, 5.0
-
-#define CAMERA2VIEW_PERSPECTIVE 20.0f, wh, 0.0f, 10.0f
-#define MODEL2WORLD_SCALE 1.5f
-#define MODEL2WORLD_TRANSLATE -0.5f, -0.5f, 0.0f
-
 #define BLACK3 0.0f, 0.0f, 0.0f
 #define WHITE3 1.0f, 1.0f, 1.0f
 

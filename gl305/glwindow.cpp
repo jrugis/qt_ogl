@@ -3,7 +3,7 @@
 #include <QExposeEvent>
 #include <QString>
 
-#include "constants.h"
+#include "build.h"
 #include "glwindow.h"
 
 GLWindow::GLWindow()
@@ -31,13 +31,35 @@ void GLWindow::initializeGL()
 
 void GLWindow::keyPressEvent(QKeyEvent *e)
 {
+  if(e->text() == "?") {
+    qDebug() << "+  increase range";
+    qDebug() << "-  decrease range";
+#ifdef PLOTSTRIP
+    qDebug() << "1  move to 7005";
+    qDebug() << "3  move to 71732";
+#endif
+    qDebug() << "a  animate";
+    qDebug() << "c  color scheme";
+#ifdef PLOTSTRIP
+    qDebug() << "m  move down by 100";
+#endif
+    qDebug() << "r  reset";
+#ifdef PLOTSTRIP
+    qDebug() << "t  transform";
+#endif
+    qDebug() << "v  display values";
+    qDebug() << "x  exit";
+#ifdef PLOTSTRIP
+    qDebug() << "M  move up by 100";
+#endif
+  }
   if(e->text() == "+") {
     m_scene01->plot_range(true);
     QOpenGLWindow::update(); // schedule paint
   }
   if(e->text() == "-") {
     m_scene01->plot_range(false);
-    QOpenGLWindow::update(); // schedule paint
+    QOpenGLWindow::update();
   }
   if(e->text() == "a") {
     animate ^= 1;
@@ -47,15 +69,37 @@ void GLWindow::keyPressEvent(QKeyEvent *e)
     }
     else animation_timer->stop();
   }
-  if(e->text() == "b") {
+#ifdef PLOTSTRIP
+  if(e->text() == "m") {
+    m_scene01->move(false);
+    QOpenGLWindow::update();
+  }
+  if(e->text() == "M") {
+    m_scene01->move(true);
+    QOpenGLWindow::update();
+  }
+  if(e->text() == "t") {
+    m_scene01->toggle_transform();
+    QOpenGLWindow::update();
+  }
+  if(e->text() == "1") {
+    m_scene01->moveto(7005.0);
+    QOpenGLWindow::update();
+  }
+  if(e->text() == "2") {
+    m_scene01->moveto(71732.0);
+    QOpenGLWindow::update();
+  }
+#endif
+  if(e->text() == "c") {
     m_scene01->toggle_background();
-    QOpenGLWindow::update(); // schedule paint
+    QOpenGLWindow::update();
   }
   if(e->text() == "r") {
     animate = false;
     animation_timer->stop();
     m_scene01->reset();
-    QOpenGLWindow::update(); // schedule paint
+    QOpenGLWindow::update();
   }
   if(e->text() == "v") {
     m_scene01->toggle_show_vals();

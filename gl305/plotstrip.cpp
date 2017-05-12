@@ -7,6 +7,7 @@
 
 CPlotStrip::CPlotStrip(QOpenGLShaderProgram *shader):CPlot(shader)
 {
+  transform = false;
   setup_axis();
   setup_data();
   reset();
@@ -38,26 +39,32 @@ void CPlotStrip::calc()
     d[i] = std::complex<double>(gtodouble(greal(z)), gtodouble(gimag(z)));
   }
   avma = psp; // clear the pari stack
-  if(show_vals) qDebug() << "s = (" << s[0].real() << "," << s[0].imag()
-          << ")   d = (" << d[0].real() << "," << d[0].imag() << ")";
+  if(show_vals) qDebug() << "s = (" << s[n_dest_verts/2].real() << "," << s[n_dest_verts/2].imag()
+          << ")   d = (" << d[n_dest_verts/2].real() << "," << d[n_dest_verts/2].imag() << ")";
 
-  //for(int i=0; i<n_dest_verts; i++)
-  //  d[i] -= d[n_dest_verts-1];
+  if(transform){
+    std::complex<double> zeta_one = d[n_dest_verts-1];
+    std::complex<double> zeta_zero = d[0];
+    double angle = std::arg(zeta_one - zeta_zero);
+    double length = std::abs(zeta_one - zeta_zero);
+    for(int i=0; i<n_dest_verts; i++){
+      d[i] -= zeta_one;
+      d[i] = std::polar(abs(d[i]), arg(d[i]) - angle);
+      d[i] = d[i] * 10.0 / length;
+    }
+  }
 
   // transform and push to vbo
-  for(int i=0; i<n_source_verts; i++){
-    s[i] = s[i] * plot_scale + plot_offset;
+  for(int i=0; i<n_dest_verts; i++){
     d[i] = d[i] * plot_scale + plot_offset;
   }
-
   QVector3D *buf;
-  buf = new QVector3D[2*n_source_verts];
-  for(int i=0; i<n_source_verts; i++){
-    buf[i]    = QVector3D(s[i].real(),   s[i].imag(),   0.0f);
-    buf[i+n_source_verts] = QVector3D(d[i].real(),   d[i].imag(),   0.0f);
+  buf = new QVector3D[n_dest_verts];
+  for(int i=0; i<n_dest_verts; i++){
+    buf[i]    = QVector3D(d[i].real(),   d[i].imag(),   0.0f);
   }
   vbo_data.bind();
-  vbo_data.write(0, buf, 2*n_source_verts*sizeof(QVector3D));
+  vbo_data.write(0, buf, n_dest_verts*sizeof(QVector3D));
   vbo_data.release();
   delete[] buf;
   delete[] d;
@@ -72,30 +79,49 @@ void CPlotStrip::draw()
 
   // draw axis
   vao_axis.bind();
-  shader->setUniformValue(u_color, QVector4D(MED_GRAY, 1.0f));
-  glDrawArrays(GL_LINES, 0, 2);                  // bottom
-  glDrawArrays(GL_LINES, 2*(plot_range+1)-2, 4); // top, left
-  glDrawArrays(GL_LINES, 4*(plot_range+1)-2, 2); // right
   // horizontal and vertical grid lines
   shader->setUniformValue(u_color, QVector4D(VERY_LIGHT_GRAY, 1.0f));
-  glDrawArrays(GL_LINES, 2, 2*(plot_range-1));
-  glDrawArrays(GL_LINES, 2*(plot_range+1)+2, 2*(plot_range-1));
+  glDrawArrays(GL_LINES, 0, 2*(plot_range+1));
+  glDrawArrays(GL_LINES, 2*(plot_range+1), 2*(plot_range+1));
+  shader->setUniformValue(u_color, QVector4D(MED_GRAY, 1.0f));
+  glDrawArrays(GL_LINES, plot_range, 2); // center
+  glDrawArrays(GL_LINES, 3*plot_range+2, 2);
   vao_axis.release();
 
   // draw data: destination
+  vao_data.bind();
   glPointSize(3.0f);
   shader->setUniformValue(u_color, QVector4D(BLUE, 1.0f));
-  glDrawArrays(GL_POINTS, n_source_verts, n_dest_verts); // points
-  glDrawArrays(GL_LINE_STRIP, n_source_verts, n_dest_verts);  // lines
+  glDrawArrays(GL_POINTS, 0, n_dest_verts); // points
+  glDrawArrays(GL_LINE_STRIP, 0, n_dest_verts);  // lines
   shader->setUniformValue(u_color, QVector4D(RED, 1.0f));
-  glDrawArrays(GL_POINTS, n_source_verts+n_dest_verts/2, 1); // point
+  glDrawArrays(GL_POINTS, n_dest_verts/2, 1); // point
   vao_data.release();
 }
 
 void CPlotStrip::move_source(int x, int y)
 {
-  const float scale = 0.002f / plot_scale;
-  source_translate += std::complex<double>(x * scale, y * scale);
+  const float scale = 0.001f / plot_scale;
+  source_translate += std::complex<double>(0.0, y * scale);
+  calc();
+}
+
+void CPlotStrip::move(bool increase)
+{
+  if(increase) source_translate += std::complex<double>(0.0, 100.0);
+  else source_translate -= std::complex<double>(0.0, 100.0);
+  calc();
+}
+
+void CPlotStrip::moveto(double target)
+{
+  source_translate = std::complex<double>(0.0, target);
+  calc();
+}
+
+void CPlotStrip::plot_tick()
+{
+  source_translate += std::complex<double>(0.0, 0.01);
   calc();
 }
 
@@ -106,8 +132,10 @@ void CPlotStrip::range(bool increase)
     plot_zero += std::complex<double>(1.0, 1.0);
   }
   else{
-    plot_range -= 2;
-    plot_zero -= std::complex<double>(1.0, 1.0);
+    if(plot_range > 2){
+      plot_range -= 2;
+      plot_zero -= std::complex<double>(1.0, 1.0);
+    }
   }
   vao_axis.destroy();
   vbo_axis.destroy();
@@ -117,9 +145,8 @@ void CPlotStrip::range(bool increase)
 
 void CPlotStrip::reset()
 {
-  source_translate = std::complex<double>(0.0, 0.0);
-  //source_translate = std::complex<double>(0.0, 7005.0);
-  move_source(0, 0); // force clamp check
+  //source_translate = std::complex<double>(0.0, 0.0);
+  source_translate = std::complex<double>(0.0, 1005.0);
   calc();
 }
 
@@ -130,11 +157,11 @@ void CPlotStrip::setup_axis()
   const float pr_float = static_cast<float>(plot_range); // convenience typecast
   for(int i=0; i<plot_range+1; i++){
     // horizontal lines
-    axis_verts[2*i]            = QVector3D(0.0f, i/pr_float, 0.0f);
-    axis_verts[2*i+1]          = QVector3D(1.0f, i/pr_float, 0.0f);
+    axis_verts[2*i]            = QVector3D(-10.0f, i/pr_float, 0.0f);
+    axis_verts[2*i+1]          = QVector3D(10.0f, i/pr_float, 0.0f);
     // vertical lines
-    axis_verts[2*(plot_range+1)+2*i]   = QVector3D(i/pr_float, 0.0f, 0.0f);
-    axis_verts[2*(plot_range+1)+2*i+1] = QVector3D(i/pr_float, 1.0f, 0.0f);
+    axis_verts[2*(plot_range+1)+2*i]   = QVector3D(i/pr_float, -10.0f, 0.0f);
+    axis_verts[2*(plot_range+1)+2*i+1] = QVector3D(i/pr_float, 10.0f, 0.0f);
   }
 
   // axis vbo, vao
@@ -183,5 +210,11 @@ void CPlotStrip::setup_data()
 void CPlotStrip::toggle_show_vals()
 {
   show_vals ^= 1;
+  calc();
+}
+
+void CPlotStrip::toggle_transform()
+{
+  transform ^= 1;
   calc();
 }

@@ -17,7 +17,13 @@ CScene::CScene()
   u_world2camera = shader01->uniformLocation("world2camera");
   u_model2world = shader01->uniformLocation("model2world");
 
+#ifdef PLOTCROSS
   plot01 = new CPlotCross(shader01);
+#endif
+#ifdef PLOTSTRIP
+  plot01 = new CPlotStrip(shader01);
+#endif
+
   reset();
 }
 
@@ -30,9 +36,14 @@ CScene::~CScene()
 
 void CScene::animation_tick(int elapsed_time)
 {
+#ifdef PLOTCROSS
   angle += elapsed_time / ANIMATE_MS_DEGREE;
   if(angle > 180.0f) angle -= 360.0f;
   if(angle < -180.0f) angle += 360.0f;
+#endif
+#ifdef PLOTSTRIP
+  plot01->plot_tick();
+#endif
 }
 
 void CScene::draw()
@@ -55,6 +66,24 @@ void CScene::move_source(int x, int y)
 {
   plot01->move_source(x, y);
 }
+
+#ifdef PLOTSTRIP
+void CScene::move(bool increase)
+{
+  plot01->move(increase);
+}
+
+void CScene::moveto(double target)
+{
+  plot01->moveto(target);
+}
+
+void CScene::toggle_transform()
+{
+  plot01->toggle_transform();
+}
+#endif
+
 void CScene::plot_range(bool increase)
 {
   plot01->range(increase);

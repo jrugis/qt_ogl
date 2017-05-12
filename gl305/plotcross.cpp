@@ -127,8 +127,10 @@ void CPlotCross::range(bool increase)
     plot_zero += std::complex<double>(1.0, 1.0);
   }
   else{
-    plot_range -= 2;
-    plot_zero -= std::complex<double>(1.0, 1.0);
+    if(plot_range > 2){
+      plot_range -= 2;
+      plot_zero -= std::complex<double>(1.0, 1.0);
+    }
   }
   vao_axis.destroy();
   vbo_axis.destroy();
@@ -140,7 +142,6 @@ void CPlotCross::reset()
 {
   source_translate = std::complex<double>(0.0, 0.0);
   move_source(0, 0); // force clamp check
-  calc();
 }
 
 void CPlotCross::setup_axis()

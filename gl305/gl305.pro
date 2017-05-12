@@ -18,7 +18,8 @@ HEADERS += \
     plot.h \
     constants.h \
     plotcross.h \
-    plotstrip.h
+    plotstrip.h \
+    build.h
 
 INCLUDEPATH += \
     /usr/local/include

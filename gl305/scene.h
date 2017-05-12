@@ -1,9 +1,19 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#define CAMERA2VIEW_PERSPECTIVE 20.0f, wh, 0.0f, 10.0f
+#define MODEL2WORLD_SCALE 1.5f
+#define MODEL2WORLD_TRANSLATE -0.5f, -0.5f, 0.0f
+
+#define ANIMATE_REFRESH_RATE 29.0
+#define ANIMATE_PERIOD (1000.0 / ANIMATE_REFRESH_RATE)
+#define ANIMATE_MS_DEGREE 50.0
+
 #include <QOpenGLShaderProgram>
 
+#include "build.h"
 #include "plotcross.h"
+#include "plotstrip.h"
 
 class QOpenGLShaderProgram;
 
@@ -15,6 +25,11 @@ public:
   void animation_tick(int elapsed_time);
   void draw();
   void move_source(int x, int y);
+#ifdef PLOTSTRIP
+  void move(bool increase);
+  void moveto(double target);
+  void toggle_transform();
+#endif
   void plot_range(bool increase);
   void reset();
   void set_canvas_size(int width, int height);
@@ -32,7 +47,12 @@ private:
   QMatrix4x4 camera2view, world2camera, model2world;
   int u_camera2view, u_world2camera, u_model2world;
 
+#ifdef PLOTCROSS
   CPlotCross *plot01;
+#endif
+#ifdef  PLOTSTRIP
+  CPlotStrip *plot01;
+#endif
 
   void set_projection();
 };

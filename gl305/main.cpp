@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
   format.setVersion(3,3);
   QSurfaceFormat::setDefaultFormat(format);
 
-  pari_init(500000,2); // pari initialization
+  pari_init(100000000,2); // pari initialization
 
   GLWindow main_window;
   main_window.setTitle("gl305");

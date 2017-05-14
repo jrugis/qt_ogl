@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>shaders/pcwc_.frag</file>
-        <file>shaders/pcwc_.vert</file>
-    </qresource>
-</RCC>

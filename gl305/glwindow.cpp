@@ -36,7 +36,7 @@ void GLWindow::keyPressEvent(QKeyEvent *e)
     qDebug() << "-  decrease range";
 #ifdef PLOTSTRIP
     qDebug() << "1  move to 7005";
-    qDebug() << "3  move to 71732";
+    qDebug() << "2  move to 71732";
 #endif
     qDebug() << "a  animate";
     qDebug() << "c  color scheme";

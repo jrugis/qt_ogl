@@ -7,15 +7,18 @@
 
 CPlotStrip::CPlotStrip(QOpenGLShaderProgram *shader):CPlot(shader)
 {
+  solver = new CSolver();
+  solver->init("192.168.0.115", "2000");
   transform = false;
   setup_axis();
   setup_data();
-  reset();
+  //reset();
 }
 
 CPlotStrip::~CPlotStrip()
 {
   delete[] source;
+  delete solver;
 }
 
 void CPlotStrip::calc()
@@ -30,18 +33,16 @@ void CPlotStrip::calc()
   n_dest_verts = n_source_verts;
   std::complex<double> *d;
   d = new std::complex<double>[n_dest_verts];
-  pari_sp psp = avma; // pari stack pointer
-  GEN x(cgetc(DEFAULTPREC)), z(cgetc(DEFAULTPREC)); // pari variables
-  for(int i=0; i<n_source_verts; i++){
-    if(s[i] == std::complex<double>(1.0, 0.0)) return; // avoid zeta pole
-    x = gadd(dbltor(s[i].real()), gmul(dbltor(s[i].imag()), gen_I()));
-    z = gzeta(x, DEFAULTPREC); // pari zeta function
-    d[i] = std::complex<double>(gtodouble(greal(z)), gtodouble(gimag(z)));
-  }
-  avma = psp; // clear the pari stack
-  if(show_vals) qDebug() << "s = (" << s[n_dest_verts/2].real() << "," << s[n_dest_verts/2].imag()
-          << ")   d = (" << d[n_dest_verts/2].real() << "," << d[n_dest_verts/2].imag() << ")";
 
+  double settings[] = {0, 0.05, 21, 0, 0, 1};
+  settings[3] = s[0].imag();
+  char* cbuf = solver->calc(settings);
+  for(int i=0; i<21; i++){
+    d[i] = std::complex<double>(*(double*)(cbuf+(16*i)), *(double*)(cbuf+(16*i)+8));
+  }
+
+  if(show_vals) qDebug() << "s = (" << s[0].imag()
+          << ")   d = (" << d[n_dest_verts/2].real() << "," << d[n_dest_verts/2].imag() << ")";
   if(transform){
     std::complex<double> zeta_one = d[n_dest_verts-1];
     std::complex<double> zeta_zero = d[0];

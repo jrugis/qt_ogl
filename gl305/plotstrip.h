@@ -4,6 +4,7 @@
 #define N_SPIRAL_VERTS 21
 #define MAX_DATA_VERTS 100
 
+#include "solver.h"
 #include "plot.h"
 
 class CPlotStrip : public CPlot
@@ -22,6 +23,7 @@ public:
   void toggle_transform();
 
 private:
+  CSolver *solver;
   std::complex<double> *source;
   int n_source_verts, n_dest_verts;
   bool transform;

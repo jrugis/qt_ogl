@@ -15,13 +15,12 @@ class GLWindow : public QOpenGLWindow, protected QOpenGLFunctions
   Q_OBJECT // required for signals and slots
 
 public:
-  GLWindow();
+  GLWindow(char* ipaddr, char* port);
   ~GLWindow();
 
 protected:
   void initializeGL();
   void keyPressEvent(QKeyEvent *e);
-  void mouseMoveEvent(QMouseEvent *event);
   void paintGL();
   void resizeGL(int width, int height);
 
@@ -36,6 +35,8 @@ private:
   QTime elapsed_time;
   QPoint lastPos;
   CScene *m_scene01;
+  char* ipaddr;
+  char* port;
 };
 
 #endif // GLWINDOW_H

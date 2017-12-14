@@ -8,7 +8,6 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 #include <complex>
-#include <vector>
 
 class CPlot
 {
@@ -16,7 +15,6 @@ public:
   CPlot(QOpenGLShaderProgram *shader);
   virtual ~CPlot();
   virtual void draw() = 0;                     // pure virtual
-  virtual void move_source(int x, int y) = 0;  //
   virtual void range(bool increase) = 0;       //
   virtual void reset() = 0;                    //
   virtual void toggle_show_vals() = 0;         //
@@ -31,9 +29,8 @@ protected:
   std::complex<double> plot_zero;
   double plot_scale;
   std::complex<double> plot_offset;
-  double re_lo, re_hi, im_lo, im_hi; // clamp limits
 
-  std::complex<double> source_translate;
+  double source_v;
   bool show_vals;
 
   virtual void calc() = 0;         // pure virtual

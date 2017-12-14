@@ -1,54 +1,38 @@
-#define register // used by pari but deprecated in c++11
-#include <pari/pari.h>
-#undef register
-
 #include "constants.h"
 #include "plotstrip.h"
 
-CPlotStrip::CPlotStrip(QOpenGLShaderProgram *shader):CPlot(shader)
+CPlotStrip::CPlotStrip(char* ipaddr, char* port, QOpenGLShaderProgram *shader):CPlot(shader)
 {
-  solver = new CSolver();
-  solver->init("192.168.0.115", "2000");
+  solver = new CSolver(ipaddr, port);
   transform = false;
   setup_axis();
   setup_data();
-  //reset();
 }
 
 CPlotStrip::~CPlotStrip()
 {
-  delete[] source;
   delete solver;
 }
 
 void CPlotStrip::calc()
 {
-  // transform the source
-  std::complex<double> *s;
-  s = new std::complex<double>[n_source_verts];
-  for(int i=0; i<n_source_verts; i++)
-    s[i] = source[i] + source_translate;
-
-  // apply source -> destination mapping
-  n_dest_verts = n_source_verts;
   std::complex<double> *d;
-  d = new std::complex<double>[n_dest_verts];
+  d = new std::complex<double>[N_VERTS+1];
 
-  double settings[] = {0, 0.05, 21, 0, 0, 1};
-  settings[3] = s[0].imag();
-  char* cbuf = solver->calc(settings);
-  for(int i=0; i<21; i++){
+  char cbuf[BUFFSIZE];
+  solver->calc(source_v, cbuf);        // call the remote zeta solver
+  for(int i=0; i<N_VERTS; i++){   // repackage the results
     d[i] = std::complex<double>(*(double*)(cbuf+(16*i)), *(double*)(cbuf+(16*i)+8));
   }
+  d[N_VERTS] = std::complex<double>(0,0);
+  if(show_vals) qDebug() << qSetRealNumberPrecision(12) << "v = " << source_v;
 
-  if(show_vals) qDebug() << "s = (" << s[0].imag()
-          << ")   d = (" << d[n_dest_verts/2].real() << "," << d[n_dest_verts/2].imag() << ")";
   if(transform){
-    std::complex<double> zeta_one = d[n_dest_verts-1];
+    std::complex<double> zeta_one = d[N_VERTS-1];
     std::complex<double> zeta_zero = d[0];
     double angle = std::arg(zeta_one - zeta_zero);
     double length = std::abs(zeta_one - zeta_zero);
-    for(int i=0; i<n_dest_verts; i++){
+    for(int i=0; i<(N_VERTS+1); i++){
       d[i] -= zeta_one;
       d[i] = std::polar(abs(d[i]), arg(d[i]) - angle);
       d[i] = d[i] * 10.0 / length;
@@ -56,20 +40,19 @@ void CPlotStrip::calc()
   }
 
   // transform and push to vbo
-  for(int i=0; i<n_dest_verts; i++){
+  for(int i=0; i<(N_VERTS+1); i++){
     d[i] = d[i] * plot_scale + plot_offset;
   }
   QVector3D *buf;
-  buf = new QVector3D[n_dest_verts];
-  for(int i=0; i<n_dest_verts; i++){
-    buf[i]    = QVector3D(d[i].real(),   d[i].imag(),   0.0f);
+  buf = new QVector3D[N_VERTS+1];
+  for(int i=0; i<(N_VERTS+1); i++){
+    buf[i] = QVector3D(d[i].real(), d[i].imag(), 0.0f);
   }
   vbo_data.bind();
-  vbo_data.write(0, buf, n_dest_verts*sizeof(QVector3D));
+  vbo_data.write(0, buf, (N_VERTS+1)*sizeof(QVector3D));
   vbo_data.release();
   delete[] buf;
   delete[] d;
-  delete[] s;
 }
 
 void CPlotStrip::draw()
@@ -93,36 +76,31 @@ void CPlotStrip::draw()
   vao_data.bind();
   glPointSize(3.0f);
   shader->setUniformValue(u_color, QVector4D(BLUE, 1.0f));
-  glDrawArrays(GL_POINTS, 0, n_dest_verts); // points
-  glDrawArrays(GL_LINE_STRIP, 0, n_dest_verts);  // lines
+  glDrawArrays(GL_POINTS, 0, N_VERTS); // points
+  glDrawArrays(GL_LINE_STRIP, 0, N_VERTS);  // lines
   shader->setUniformValue(u_color, QVector4D(RED, 1.0f));
-  glDrawArrays(GL_POINTS, n_dest_verts/2, 1); // point
+  glDrawArrays(GL_POINTS, N_VERTS/2, 1); // point
+  shader->setUniformValue(u_color, QVector4D(BLACK3, 1.0f));
+  glDrawArrays(GL_POINTS, N_VERTS, 1); // point
   vao_data.release();
 }
 
-void CPlotStrip::move_source(int x, int y)
+void CPlotStrip::move(bool increase, double amount)
 {
-  const float scale = 0.001f / plot_scale;
-  source_translate += std::complex<double>(0.0, y * scale);
-  calc();
-}
-
-void CPlotStrip::move(bool increase)
-{
-  if(increase) source_translate += std::complex<double>(0.0, 100.0);
-  else source_translate -= std::complex<double>(0.0, 100.0);
+  if(increase) source_v += amount;
+  else source_v -= amount;
   calc();
 }
 
 void CPlotStrip::moveto(double target)
 {
-  source_translate = std::complex<double>(0.0, target);
+  source_v = target;
   calc();
 }
 
 void CPlotStrip::plot_tick()
 {
-  source_translate += std::complex<double>(0.0, 0.01);
+  source_v += 0.01;
   calc();
 }
 
@@ -141,13 +119,12 @@ void CPlotStrip::range(bool increase)
   vao_axis.destroy();
   vbo_axis.destroy();
   setup_axis();
-  move_source(0, 0);
+  calc();
 }
 
 void CPlotStrip::reset()
 {
-  //source_translate = std::complex<double>(0.0, 0.0);
-  source_translate = std::complex<double>(0.0, 1005.0);
+  source_v = 1005.0;
   calc();
 }
 
@@ -181,16 +158,12 @@ void CPlotStrip::setup_axis()
   // set plot scale and calculate clamp limits
   plot_scale = 1.0 / plot_range;
   plot_offset = plot_zero * plot_scale;
-  re_lo = -plot_offset.real() / plot_scale;
-  re_hi = (1.0 - plot_offset.real()) / plot_scale;
-  im_lo = -plot_offset.imag() / plot_scale;
-  im_hi = (1.0 - plot_offset.imag()) / plot_scale;
 }
 
 void CPlotStrip::setup_data()
 {
   // data vbo, vao
-  const QVector3D data_verts[MAX_DATA_VERTS] = {};
+  const QVector3D data_verts[N_VERTS+1] = {};
   vbo_data.create();  // vbo
   vbo_data.bind();
   vbo_data.setUsagePattern(QOpenGLBuffer::DynamicDraw);
@@ -201,11 +174,6 @@ void CPlotStrip::setup_data()
   shader->setAttributeBuffer(0, GL_FLOAT, 0, 3);
   vao_data.release();
   vbo_data.release();
-
-  n_source_verts = N_SPIRAL_VERTS;
-  source = new std::complex<double>[n_source_verts];
-  for(int i=0; i<n_source_verts; i++)
-    source[i] = std::complex<double>(1.00*i/(n_source_verts-1), 0.0);
 }
 
 void CPlotStrip::toggle_show_vals()

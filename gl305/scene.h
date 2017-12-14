@@ -11,8 +11,6 @@
 
 #include <QOpenGLShaderProgram>
 
-#include "build.h"
-#include "plotcross.h"
 #include "plotstrip.h"
 
 class QOpenGLShaderProgram;
@@ -20,16 +18,13 @@ class QOpenGLShaderProgram;
 class CScene
 {
 public:
-  CScene();
+  CScene(char* ipaddr, char* port);
   ~CScene();
   void animation_tick(int elapsed_time);
   void draw();
-  void move_source(int x, int y);
-#ifdef PLOTSTRIP
-  void move(bool increase);
+  void move(bool increase, double amount);
   void moveto(double target);
   void toggle_transform();
-#endif
   void plot_range(bool increase);
   void reset();
   void set_canvas_size(int width, int height);
@@ -47,12 +42,7 @@ private:
   QMatrix4x4 camera2view, world2camera, model2world;
   int u_camera2view, u_world2camera, u_model2world;
 
-#ifdef PLOTCROSS
-  CPlotCross *plot01;
-#endif
-#ifdef  PLOTSTRIP
   CPlotStrip *plot01;
-#endif
 
   void set_projection();
 };

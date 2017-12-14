@@ -3,11 +3,12 @@
 #include <QExposeEvent>
 #include <QString>
 
-#include "build.h"
 #include "glwindow.h"
 
-GLWindow::GLWindow()
+GLWindow::GLWindow(char* ip, char* np)
 {
+  ipaddr = ip;
+  port = np;
   animate = false;
   animation_timer = new QTimer(this);
   connect(animation_timer, SIGNAL(timeout()), this, SLOT(animation_tick()));
@@ -26,32 +27,28 @@ void GLWindow::initializeGL()
   qDebug() << "OpenGL" << (const char*)glGetString(GL_VERSION);
   qDebug() << "GLSL" << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 
-  m_scene01 = new CScene();
+  m_scene01 = new CScene(ipaddr, port);
 }
 
 void GLWindow::keyPressEvent(QKeyEvent *e)
 {
   if(e->text() == "?") {
+    qDebug() << "<up>   move up   by 0.01";
+    qDebug() << "<down> move down by 0.01";
     qDebug() << "+  increase range";
     qDebug() << "-  decrease range";
-#ifdef PLOTSTRIP
     qDebug() << "1  move to 7005";
-    qDebug() << "2  move to 71732";
-#endif
+    qDebug() << "2  move to 71732.83";
     qDebug() << "a  animate";
     qDebug() << "c  color scheme";
-#ifdef PLOTSTRIP
     qDebug() << "m  move down by 100";
-#endif
+    qDebug() << "n  move down by 1";
     qDebug() << "r  reset";
-#ifdef PLOTSTRIP
     qDebug() << "t  transform";
-#endif
     qDebug() << "v  display values";
     qDebug() << "x  exit";
-#ifdef PLOTSTRIP
     qDebug() << "M  move up by 100";
-#endif
+    qDebug() << "N  move up by 1";
   }
   if(e->text() == "+") {
     m_scene01->plot_range(true);
@@ -69,13 +66,20 @@ void GLWindow::keyPressEvent(QKeyEvent *e)
     }
     else animation_timer->stop();
   }
-#ifdef PLOTSTRIP
   if(e->text() == "m") {
-    m_scene01->move(false);
+    m_scene01->move(false, 100);
     QOpenGLWindow::update();
   }
   if(e->text() == "M") {
-    m_scene01->move(true);
+    m_scene01->move(true, 100);
+    QOpenGLWindow::update();
+  }
+  if(e->text() == "n") {
+    m_scene01->move(false, 1);
+    QOpenGLWindow::update();
+  }
+  if(e->text() == "N") {
+    m_scene01->move(true, 1);
     QOpenGLWindow::update();
   }
   if(e->text() == "t") {
@@ -87,10 +91,9 @@ void GLWindow::keyPressEvent(QKeyEvent *e)
     QOpenGLWindow::update();
   }
   if(e->text() == "2") {
-    m_scene01->moveto(71732.0);
+    m_scene01->moveto(71732.83);
     QOpenGLWindow::update();
   }
-#endif
   if(e->text() == "c") {
     m_scene01->toggle_background();
     QOpenGLWindow::update();
@@ -104,27 +107,18 @@ void GLWindow::keyPressEvent(QKeyEvent *e)
   if(e->text() == "v") {
     m_scene01->toggle_show_vals();
   }
-  //if(e->key() == Qt::Key_Escape) {
   if(e->text() == "x") {
     QCoreApplication::exit(0);
   }
-  else QOpenGLWindow::keyPressEvent(e);
-}
-
-void GLWindow::mouseMoveEvent(QMouseEvent *event)
-{
-  int dx = event->x() - lastPos.x();
-  int dy = event->y() - lastPos.y();
-  if(event->buttons() & Qt::LeftButton){
-    if(event->modifiers().testFlag(Qt::ShiftModifier)){
-      if(event->modifiers().testFlag(Qt::ControlModifier))
-        m_scene01->move_source(0, -dy);
-      else m_scene01->move_source(dx, 0);
-    }
-    else m_scene01->move_source(dx, -dy);
-    QOpenGLWindow::update(); // schedule paint
+  if(e->key() == Qt::Key_Up) {
+    m_scene01->move(true, 0.01);
+    QOpenGLWindow::update();
   }
-  lastPos = event->pos();
+  if(e->key() == Qt::Key_Down) {
+    m_scene01->move(false, 0.01);
+    QOpenGLWindow::update();
+  }
+  else QOpenGLWindow::keyPressEvent(e);
 }
 
 void GLWindow::paintGL()

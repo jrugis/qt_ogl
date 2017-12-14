@@ -1,14 +1,14 @@
 #include <QGuiApplication>
 #include <QSurfaceFormat>
 
-#define register // register variables deprecated in c++11
-#include <pari/pari.h>
-#undef register
-
 #include "glwindow.h"
 
 int main(int argc, char *argv[])
 {
+  if(argc != 3){
+    qDebug() << "Usage: ./gl305 <ip address> <port>";
+    exit(1);
+  }
   QGuiApplication app(argc, argv);
 
   QSurfaceFormat format;
@@ -19,9 +19,7 @@ int main(int argc, char *argv[])
   format.setVersion(3,3);
   QSurfaceFormat::setDefaultFormat(format);
 
-  //pari_init(100000000,2); // pari initialization
-
-  GLWindow main_window;
+  GLWindow main_window(argv[1], argv[2]);
   main_window.setTitle("gl305");
   main_window.resize(QSize(600,600));
   main_window.show();

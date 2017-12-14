@@ -9,7 +9,6 @@ SOURCES += main.cpp \
     glwindow.cpp \
     scene.cpp \
     plot.cpp \
-    plotcross.cpp \
     plotstrip.cpp \
     solver.cpp
 
@@ -18,9 +17,7 @@ HEADERS += \
     scene.h \
     plot.h \
     constants.h \
-    plotcross.h \
     plotstrip.h \
-    build.h \
     solver.h
 
 INCLUDEPATH += \

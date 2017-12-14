@@ -9,16 +9,14 @@ SOURCES += main.cpp \
     glwindow.cpp \
     scene.cpp \
     plot.cpp \
-    plotcross.cpp \
-    plotstrip.cpp
+    plotcross.cpp
 
 HEADERS += \
     glwindow.h \
     scene.h \
     plot.h \
     constants.h \
-    plotcross.h \
-    plotstrip.h
+    plotcross.h
 
 INCLUDEPATH += \
     /usr/local/include

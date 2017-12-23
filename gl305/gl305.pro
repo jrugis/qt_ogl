@@ -24,7 +24,6 @@ INCLUDEPATH += \
     /usr/local/include
 
 LIBS += \
-    -lpari \
     -L/usr/local/lib \
     -v
 
